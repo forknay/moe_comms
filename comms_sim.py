@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from time import time
 # ---------------------------
 # Configuration Parameters
 # ---------------------------
@@ -9,13 +8,15 @@ from time import time
 NUM_EXPERTS = 128            # Total number of experts in the MoE layer
 NUM_GPUS = 8                 # Number of GPUs used in the system
 EXPERTS_PER_GPU = NUM_EXPERTS // NUM_GPUS  # Experts evenly divided across GPUs
-TOKENS = 1                # Number of tokens to simulate (set to 1 for decoder)
+TOKENS = 1024                # Number of tokens to simulate (set to 1 for decoder, 1024 for encoder)
 DTYPE_SIZE = 2               # Size in bytes (float16 = 2 bytes, float32 = 4 bytes)
 NB_SHARED = 0                # Number of shared experts (NOT IMPLEMENTED)
 TOP_K = 8                    # Number of routed experts assigned to each token
 TOKEN_SIZE = 4096            # Embedding dimension size
 TOT_EXPERTS = TOP_K + NB_SHARED  # Total experts activated per token
 
+if NUM_EXPERTS % NUM_GPUS != 0:
+    raise ValueError("NUM_EXPERTS must be divisible by NUM_GPUS for even distribution of experts across GPUs.")
 # ---------------------------
 # Step 1: Generate Routing Table
 # ---------------------------
@@ -84,8 +85,10 @@ def plot_comm_matrix(matrix):
 # ---------------------------
 # Run the Full Simulation
 # ---------------------------
-
-routing = generate_routing(TOKENS, TOP_K, NUM_EXPERTS)
-expert_gpu_map = get_expert_gpu_map(NUM_EXPERTS, NUM_GPUS)
-comm_matrix = simulate_all_to_all(routing, expert_gpu_map, NUM_GPUS, TOKEN_SIZE, DTYPE_SIZE)
-plot_comm_matrix(comm_matrix)
+if "__main__" == __name__:
+    np.random.seed(0)  # For reproducibility
+    print(f"Simulating communication for {NUM_EXPERTS} experts across {NUM_GPUS} GPUs with {TOKENS} token(s)...")
+    routing = generate_routing(TOKENS, TOP_K, NUM_EXPERTS)
+    expert_gpu_map = get_expert_gpu_map(NUM_EXPERTS, NUM_GPUS)
+    comm_matrix = simulate_all_to_all(routing, expert_gpu_map, NUM_GPUS, TOKEN_SIZE, DTYPE_SIZE)
+    plot_comm_matrix(comm_matrix)
