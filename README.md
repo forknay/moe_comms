@@ -19,7 +19,7 @@ Dataset Generator (Initializing EP & Routing matrices)
 
 ----------------------------------------------------------------------
 
-TO ADD (PERFORMANCE MODEL):
+TO ADD (PERFORMANCE MODEL): **assuming the use of theoretical numbers & no empirical tests (i have no gpus lol)
 
 Latency Modeling
     Average/Worst Case latency
