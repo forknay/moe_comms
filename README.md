@@ -1,14 +1,16 @@
 # moe_comms
 MoE All-to-All communications modeling with simulation and performance modeling
 
+Added :
+
+-Basic Parametrization for MoE & Hardware Restrictions
+-Expert load imbalance
+-Heatmap visualization of congestion patterns
+
 -----------------------------
 
 TO ADD (SIMULATION):
 
-Expert load imbalance
-
-Compute Bandwidth Requirement
-See congestion patterns
 Compute load/expert
 
 Dataset Generator (Initializing EP & Routing matrices)
@@ -24,7 +26,6 @@ TO ADD (PERFORMANCE MODEL): **assuming the use of theoretical numbers & no empir
 Latency Modeling
     Average/Worst Case latency
     Bandwidth Restrictions
-    Hardware Restrictions (GPUs)
     Sync time for AlltoAll 
 
 Hierarchical communication (source to cluster, cluster to node)
