@@ -79,7 +79,7 @@ def simulate_all_to_all(routing, expert_gpu_map, num_gpus, token_size, dtype_siz
     comm_matrix = np.zeros((num_gpus, num_gpus))  # Communication matrix in bytes
     expert_load = np.zeros(NUM_EXPERTS)  # Track received on each expert
     for token_id, experts in enumerate(routing):
-        source_gpu = token_id % num_gpus  # DP equal load on each GPU
+        source_gpu = token_id % num_gpus  # Distribute equal load on each GPU
         for expert in experts:
             target_gpu = expert_gpu_map[expert]
             if source_gpu != target_gpu:

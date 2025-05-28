@@ -1,5 +1,5 @@
 # moe_comms
-MoE All-to-All communications modeling with simulation and performance modeling
+MoE All-to-All communications modeling with simulation and performance modeling, assuming 
 
 Added :
 
@@ -37,4 +37,4 @@ Throughput calculation (prefill / decode)
 
 -----------------------------------------
 
-(Potentially add DP + AllReduce time analysis)
+(Potentially add DP + AllReduce time analysis, WORLD_SIZE = EP * DP)
