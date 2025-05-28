@@ -6,18 +6,15 @@ Added :
 -Basic Parametrization for MoE & Hardware Restrictions
 -Expert load imbalance
 -Heatmap visualization of congestion patterns
+-Compute load/expert
 
 -----------------------------
 
 TO ADD (SIMULATION):
 
-Compute load/expert
-
 Dataset Generator (Initializing EP & Routing matrices)
     Parametrize to generate custom datasets
-        Network Topology constraints
-        Different load distributions (ie: how much entropy)
-        Restrain max amount of tokens (don't want too many dropped)
+        ? Restrain max amount of tokens (don't want too many dropped)
 
 ----------------------------------------------------------------------
 
@@ -27,6 +24,7 @@ Latency Modeling
     Average/Worst Case latency
     Bandwidth Restrictions
     Sync time for AlltoAll 
+    Network Topology constraints
 
 Hierarchical communication (source to cluster, cluster to node)
     Different Bandwidth depending on level

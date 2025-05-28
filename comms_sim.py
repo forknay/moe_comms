@@ -16,7 +16,7 @@ TOP_K = 8                    # Number of routed experts assigned to each token
 TOKEN_SIZE = 4096            # Embedding dimension size
 TOT_EXPERTS = TOP_K + NB_SHARED  # Total experts activated per token
 
-IS_BALANCED = True         # Set to False for imbalanced routing
+IS_BALANCED = False         # Set to False for imbalanced routing
 HOT_RATIO = 0.5            # Ratio of hot experts (for imbalanced routing), 1.0 for balanced
 HOT_WEIGHT = 0.9            # Weight for hot experts in imbalanced routing, 1.0 for balanced
 
@@ -75,17 +75,19 @@ def simulate_all_to_all(routing, expert_gpu_map, num_gpus, token_size, dtype_siz
     
     Returns a (num_gpus x num_gpus) matrix where [i][j] = bytes sent from GPU i to GPU j.
     """
+    print(routing)
     comm_matrix = np.zeros((num_gpus, num_gpus))  # Communication matrix in bytes
-
+    expert_load = np.zeros(NUM_EXPERTS)  # Track received on each expert
     for token_id, experts in enumerate(routing):
         source_gpu = token_id % num_gpus  # DP equal load on each GPU
         for expert in experts:
             target_gpu = expert_gpu_map[expert]
             if source_gpu != target_gpu:
                 data_size = token_size * dtype_size
+                expert_load[int(expert)] += data_size
                 comm_matrix[source_gpu][target_gpu] += data_size
 
-    return comm_matrix
+    return comm_matrix, np.round(expert_load / (1024 ** 2), 2)
 
 
 # ---------------------------
@@ -110,12 +112,16 @@ def plot_comm_matrix(matrix):
 if "__main__" == __name__:
     np.random.seed()  # For reproducibility
     print(f"Simulating communication for {NUM_EXPERTS} experts across {NUM_GPUS} GPUs with {TOKENS} token(s)...")
+    print(f"Token Size: {TOKEN_SIZE}, DType Size: {DTYPE_SIZE} bytes, Top-K: {TOP_K}, Total Experts per Token: {TOT_EXPERTS}")
+    print(f"Experts per GPU: {EXPERTS_PER_GPU}, Shared Experts: {NB_SHARED}")
+
     if IS_BALANCED:
-        print("Balanced Routing")
+        print("(Balanced Routing)")
         routing = generate_balanced_routing(TOKENS, TOP_K, NUM_EXPERTS)
     else:
-        print(f"Imbalanced Routing, Hot Ratio: {HOT_RATIO}, Hot Weight: {HOT_WEIGHT}")
+        print(f"(Imbalanced Routing, Hot Ratio: {HOT_RATIO}, Hot Weight: {HOT_WEIGHT})")
         routing = generate_imbalanced_routing(TOKENS, TOP_K, NUM_EXPERTS, HOT_RATIO, HOT_WEIGHT)
     expert_gpu_map = get_expert_gpu_map(NUM_EXPERTS, NUM_GPUS)
-    comm_matrix = simulate_all_to_all(routing, expert_gpu_map, NUM_GPUS, TOKEN_SIZE, DTYPE_SIZE)
+    comm_matrix, expert_load = simulate_all_to_all(routing, expert_gpu_map, NUM_GPUS, TOKEN_SIZE, DTYPE_SIZE)
+    print(f"Received load per expert : {expert_load}")
     plot_comm_matrix(comm_matrix)
