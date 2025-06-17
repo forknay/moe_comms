@@ -5,16 +5,18 @@ import seaborn as sns
 # Configuration Parameters
 # ---------------------------
 
+# 8 DP 8 EP, one gpu per node
 NUM_EXPERTS = 128            # Total number of experts in the MoE layer
 NUM_GPUS = 8                 # Number of GPUs used in the system
 EXPERTS_PER_GPU = NUM_EXPERTS // NUM_GPUS  # Experts evenly divided across GPUs
 
 TOKENS = 1024                # Number of tokens to simulate (set to 1 for decoder, 1024 for encoder)
-DTYPE_SIZE = 2               # Size in bytes (float16 = 2 bytes, float32 = 4 bytes)
-NB_SHARED = 0                # Number of shared experts (NOT IMPLEMENTED)
-TOP_K = 8                    # Number of routed experts assigned to each token
-TOKEN_SIZE = 4096            # Embedding dimension size
-TOT_EXPERTS = TOP_K + NB_SHARED  # Total experts activated per token
+TOKENS_PER_GPU = TOKENS // NUM_GPUS  # Tokens evenly divided across GPUs
+DTYPE_SIZE = 4               # Size in bytes (float16 = 2 bytes, float32 = 4 bytes)
+TOP_K_EXPERTS = 8           # Number of routed experts assigned to each token
+TOP_K_NODES = 4        # Number of nodes to route to (for each token)
+EMBED_DIM = 2048            # Embedding dimension size
+
 
 IS_BALANCED = False         # Set to False for imbalanced routing
 HOT_RATIO = 0.5            # Ratio of hot experts (for imbalanced routing), 1.0 for balanced
@@ -26,14 +28,14 @@ if NUM_EXPERTS % NUM_GPUS != 0:
 # Step 1: Generate Routing Table
 # ---------------------------
 
-def generate_balanced_routing(tokens, top_k, num_experts):
+def generate_balanced_routing(tokens, top_k_experts, num_experts):
     """
     Randomly assign 'top_k' experts to each token.
     
     Returns a (tokens x top_k) matrix of expert indices.
     """
 
-    return np.random.randint(0, num_experts, size=(tokens, top_k))
+    return np.random.randint(0, num_experts, size=(tokens, top_k_experts))
 
 def generate_imbalanced_routing(tokens, top_k, num_experts, hot_ratio, hot_weight):
     """
@@ -112,16 +114,16 @@ def plot_comm_matrix(matrix):
 if "__main__" == __name__:
     np.random.seed()  # For reproducibility
     print(f"Simulating communication for {NUM_EXPERTS} experts across {NUM_GPUS} GPUs with {TOKENS} token(s)...")
-    print(f"Token Size: {TOKEN_SIZE}, DType Size: {DTYPE_SIZE} bytes, Top-K: {TOP_K}, Total Experts per Token: {TOT_EXPERTS}")
-    print(f"Experts per GPU: {EXPERTS_PER_GPU}, Shared Experts: {NB_SHARED}")
+    print(f"Token Size: {EMBED_DIM}, DType Size: {DTYPE_SIZE} bytes, Top-K: {TOP_K_EXPERTS}")
+    print(f"Experts per GPU: {EXPERTS_PER_GPU}")
 
     if IS_BALANCED:
         print("(Balanced Routing)")
-        routing = generate_balanced_routing(TOKENS, TOP_K, NUM_EXPERTS)
+        routing = generate_balanced_routing(TOKENS, TOP_K_EXPERTS, NUM_EXPERTS)
     else:
         print(f"(Imbalanced Routing, Hot Ratio: {HOT_RATIO}, Hot Weight: {HOT_WEIGHT})")
-        routing = generate_imbalanced_routing(TOKENS, TOP_K, NUM_EXPERTS, HOT_RATIO, HOT_WEIGHT)
+        routing = generate_imbalanced_routing(TOKENS, TOP_K_EXPERTS, NUM_EXPERTS, HOT_RATIO, HOT_WEIGHT)
     expert_gpu_map = get_expert_gpu_map(NUM_EXPERTS, NUM_GPUS)
-    comm_matrix, expert_load = simulate_all_to_all(routing, expert_gpu_map, NUM_GPUS, TOKEN_SIZE, DTYPE_SIZE)
+    comm_matrix, expert_load = simulate_all_to_all(routing, expert_gpu_map, NUM_GPUS, EMBED_DIM, DTYPE_SIZE)
     print(f"Received load per expert : {expert_load}")
     plot_comm_matrix(comm_matrix)
