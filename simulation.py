@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-NUM_EXPERTS = 256            # Total number of experts in the MoE layer
+NUM_EXPERTS = 128            # Total number of experts in the MoE layer
 SEQLEN = 1024                # Number of tokens to simulate
 TOP_K = 8                    # Number of routed experts assigned to each token
 EMBED_DIM = 7168             # Embedding dimension size
@@ -24,7 +24,7 @@ class Gate:
         nb_hot_experts = int(NUM_EXPERTS * HOT_RATIO) 
         hot_experts = random.sample(range(NUM_EXPERTS), nb_hot_experts)
         cold_experts = list(set(range(NUM_EXPERTS)) - set(hot_experts))
-
+        print(hot_experts, cold_experts)
         if nb_hot_experts == NUM_EXPERTS:
             expert_weights = [1 / NUM_EXPERTS] * NUM_EXPERTS
         else:
@@ -38,10 +38,11 @@ class Gate:
         routing_table = [
             np.random.choice(all_experts, TOP_K, p=expert_weights, replace=False) for _ in range(SEQLEN)
         ]
-        # Change data types as desired
+        # Change data types as desired, note that int8 only goes up to 127, so int16 is needed for nb_experts > 128
         mock_weights = np.random.rand(SEQLEN, TOP_K).astype(np.float32)
         return mock_weights, np.array(routing_table, dtype=np.int8)
 
 if __name__ == "__main__":
     gate_output = Gate.generate_routing()
-    print(gate_output[0].shape, gate_output[1].shape)
+    print("Shapes: ", gate_output[0].shape, gate_output[1].shape)
+    print("Samples: ", gate_output[0][0], gate_output[1][0])
