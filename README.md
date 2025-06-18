@@ -1,24 +1,21 @@
 # moe_comms
-MoE All-to-All communications modeling with simulation and performance modeling, assuming 
+MoE All-to-All communications modeling with simulation and performance modeling
 
 Added :
 
 -Basic Parametrization for MoE & Hardware Restrictions
--Expert load imbalance
+
 -Heatmap visualization of congestion patterns
--Compute load/expert
-
------------------------------
-
-TO ADD (SIMULATION):
 
 Dataset Generator (Initializing EP & Routing matrices)
     Parametrize to generate custom datasets
-        ? Restrain max amount of tokens (don't want too many dropped)
 
 ----------------------------------------------------------------------
 
 TO ADD (PERFORMANCE MODEL): **assuming the use of theoretical numbers & no empirical tests (i have no gpus lol)
+
+-Expert load imbalance
+-Compute load/expert
 
 Latency Modeling
     Average/Worst Case latency
@@ -37,4 +34,4 @@ Throughput calculation (prefill / decode)
 
 -----------------------------------------
 
-(Potentially add DP + AllReduce time analysis, WORLD_SIZE = EP * DP)
+(Potentially add DP + AllReduce time analysis)

@@ -24,7 +24,6 @@ class Gate:
         nb_hot_experts = int(NUM_EXPERTS * HOT_RATIO) 
         hot_experts = random.sample(range(NUM_EXPERTS), nb_hot_experts)
         cold_experts = list(set(range(NUM_EXPERTS)) - set(hot_experts))
-        print(hot_experts, cold_experts)
         if nb_hot_experts == NUM_EXPERTS:
             expert_weights = [1 / NUM_EXPERTS] * NUM_EXPERTS
         else:
