@@ -1,10 +1,10 @@
 import numpy as np
 import random
 
-NUM_EXPERTS = 10            # Total number of experts in the MoE layer
-SEQLEN = 2                # Number of tokens to simulate (set to 1 for decoder, 1024 for encoder)
-TOP_K = 5           # Number of routed experts assigned to each token
-EMBED_DIM = 4            # Embedding dimension size
+NUM_EXPERTS = 256            # Total number of experts in the MoE layer
+SEQLEN = 1024                # Number of tokens to simulate (set to 1 for decoder, 1024 for encoder)
+TOP_K = 8           # Number of routed experts assigned to each token
+EMBED_DIM = 7168            # Embedding dimension size
 
 HOT_RATIO = 0.5            # Ratio of hot experts (for imbalanced routing), 1.0 for balanced
 HOT_WEIGHT = 0.7            # Weight for hot experts in imbalanced routing, 1.0 for balanced
@@ -30,4 +30,4 @@ class Gate:
 
 if __name__ == "__main__":
     gate_output = Gate.generate_routing()
-    print(gate_output)
+    print(gate_output[0].shape, gate_output[1].shape)
