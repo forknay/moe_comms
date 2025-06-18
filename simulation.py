@@ -21,14 +21,15 @@ class Gate:
             mock_weights (np.ndarray): Random weights for each token-expert pair.
             routing_table (np.ndarray): Routing table of expert indices per token.
         """
-        nb_hot_experts = int(NUM_EXPERTS * HOT_RATIO)
+        nb_hot_experts = int(NUM_EXPERTS * HOT_RATIO) 
         hot_experts = random.sample(range(NUM_EXPERTS), nb_hot_experts)
         cold_experts = list(set(range(NUM_EXPERTS)) - set(hot_experts))
 
         if nb_hot_experts == NUM_EXPERTS:
             expert_weights = [1 / NUM_EXPERTS] * NUM_EXPERTS
         else:
-            expert_weights = (
+            # Assuming we want a balanced distribution within groups
+            expert_weights = ( 
                 [HOT_WEIGHT / nb_hot_experts] * nb_hot_experts +
                 [(1 - HOT_WEIGHT) / (NUM_EXPERTS - nb_hot_experts)] * (NUM_EXPERTS - nb_hot_experts)
             )
