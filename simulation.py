@@ -25,8 +25,8 @@ class Gate:
         for _ in range(SEQLEN):
             token_routing = np.random.choice(hot_experts + cold_experts, TOP_K, p = expert_weights, replace = False)
             routing_table.append(token_routing)
-        mock_weights = np.random.rand(SEQLEN, TOP_K)
-        return (mock_weights, np.array(routing_table))
+        mock_weights = np.random.rand(SEQLEN, TOP_K).astype(np.float32)
+        return (mock_weights, np.array(routing_table).astype(np.int8))
 
 if __name__ == "__main__":
     gate_output = Gate.generate_routing()
