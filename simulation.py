@@ -38,6 +38,7 @@ class Gate:
         routing_table = [
             np.random.choice(all_experts, TOP_K, p=expert_weights, replace=False) for _ in range(SEQLEN)
         ]
+        # Change data types as desired
         mock_weights = np.random.rand(SEQLEN, TOP_K).astype(np.float32)
         return mock_weights, np.array(routing_table, dtype=np.int8)
 
