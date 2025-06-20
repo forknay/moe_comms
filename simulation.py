@@ -14,7 +14,12 @@ NB_NODES = 8
 
 class Gate:
     """Mixture-of-Experts routing gate simulation."""
-
+    def __init__(self):
+        self.num_experts = NUM_EXPERTS
+        self.seqlen = SEQLEN
+        self.top_k = TOP_K
+        self.embed_dim = EMBED_DIM
+        self.nb_nodes = NB_NODES
     @staticmethod
     def generate_routing() -> tuple[np.ndarray, np.ndarray]:
         """
