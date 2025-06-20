@@ -54,7 +54,31 @@ class Gate:
         mock_weights, routing_table = routing
         mock_weights = [(i % NB_NODES, i, mock_weights[i]) for i in range(SEQLEN)]
         return mock_weights, routing_table
+
+def export_routing(routing: tuple[np.ndarray, np.ndarray]) -> None:
+    """
+    Export the routing table to a file.
     
+    Args:
+        routing (tuple[np.ndarray, np.ndarray]): The routing table to export.
+        filename (str): The name of the file to save the routing table.
+    """
+    weights, routing_table = routing
+    np.savetxt('weights.csv', weights, delimiter=',')
+    np.savetxt('routing.csv', routing_table, delimiter=',', fmt='%d')
+
+
+def import_routing() -> tuple[np.ndarray, np.ndarray]:
+    """
+    Import the routing table from a file.
+    
+    Returns:
+        tuple[np.ndarray, np.ndarray]: The imported routing table.
+    """
+    weights = np.loadtxt('weights.csv', delimiter=',')
+    routing_table = np.loadtxt('routing.csv', delimiter=',', dtype=np.int8)
+    return weights, routing_table
+
 if __name__ == "__main__":
     gate_output = Gate.generate_routing()
     print("Shapes: ", gate_output[0].shape, gate_output[1].shape)
@@ -64,3 +88,6 @@ if __name__ == "__main__":
     true_hot_experts = np.argpartition(np.unique(labelled_output[1], return_counts=True)[1], -NB_HOT_EXPERTS)[-NB_HOT_EXPERTS:]
     #print("Check hot_experts: ", true_hot_experts)
     print("Hot experts load: ", sum(np.unique(labelled_output[1], return_counts=True)[1][true_hot_experts])/(SEQLEN*TOP_K))
+    export_routing(gate_output)
+    imported_routing = import_routing()
+    print(gate_output[1].all() == imported_routing[1].all())
