@@ -57,7 +57,7 @@ class Gate:
             routing (tuple[np.ndarray, np.ndarray]): Updated token weights with NPU indices for combine and token indices for reordering (batch can be determined by token index).
         """
         mock_weights, routing_table = routing
-        mock_weights = [(i % NB_NODES, i, mock_weights[i]) for i in range(SEQLEN)]
+        mock_weights = [(*mock_weights[i], np.int16(i % NB_NODES), np.int16(i)) for i in range(SEQLEN)]
         return mock_weights, routing_table
 
 def export_routing(routing: tuple[np.ndarray, np.ndarray]) -> None:
@@ -69,7 +69,12 @@ def export_routing(routing: tuple[np.ndarray, np.ndarray]) -> None:
         filename (str): The name of the file to save the routing table.
     """
     weights, routing_table = routing
-    np.savetxt('weights.csv', weights, delimiter=',')
+    # Convert to numpy array if not already
+    weights = np.array(weights)
+    # Prepare format string: floats for all but last two columns, then ints
+    n_cols = weights.shape[1]
+    fmt = ['%.7g'] * (n_cols - 2) + ['%d', '%d']
+    np.savetxt('weights.csv', weights, delimiter=',', fmt=fmt)
     np.savetxt('routing.csv', routing_table, delimiter=',', fmt='%d')
 
 
@@ -89,10 +94,10 @@ if __name__ == "__main__":
     print("Shapes: ", gate_output[0].shape, gate_output[1].shape)
     print("Samples: ", gate_output[0][0], gate_output[1][0])
     labelled_output = Gate.npu_identify(gate_output)
-    print("Labelled output (NPU, token, weight): ", labelled_output[0][0], labelled_output[1][0])
+    print("Labelled output (*weights, NPU, token): ", labelled_output[0][0], labelled_output[1][0])
     true_hot_experts = np.argpartition(np.unique(labelled_output[1], return_counts=True)[1], -NB_HOT_EXPERTS)[-NB_HOT_EXPERTS:]
     #print("Check hot_experts: ", true_hot_experts)
     print("Hot experts load: ", sum(np.unique(labelled_output[1], return_counts=True)[1][true_hot_experts])/(SEQLEN*TOP_K))
-    export_routing(gate_output)
+    export_routing(labelled_output)
     imported_routing = import_routing()
-    print(gate_output[1].all() == imported_routing[1].all())
+    print(labelled_output[1].all() == imported_routing[1].all())
