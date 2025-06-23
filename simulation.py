@@ -72,8 +72,7 @@ def export_routing(routing: tuple[np.ndarray, np.ndarray]) -> None:
     # Convert to numpy array if not already
     weights = np.array(weights)
     # Prepare format string: floats for all but last two columns, then ints
-    n_cols = weights.shape[1]
-    fmt = ['%.7g'] * (n_cols - 2) + ['%d', '%d']
+    fmt = ['%.7g'] * TOP_K + ['%d', '%d']
     np.savetxt('weights.csv', weights, delimiter=',', fmt=fmt)
     np.savetxt('routing.csv', routing_table, delimiter=',', fmt='%d')
 
