@@ -23,18 +23,21 @@ INTRA_BW = 100 # in GB/s
 INTER_BW = 50 # in GB/s
 
 def convert_to_bytes(weights, routing):
-    d = {i: 0 for i in range(NUM_NODES)}
+    node_load = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)}
     nb_recurrent = 0
     for i, route in enumerate(routing):
+        source = int(weights[i][-2])
         route = route.tolist()
         
-        if int(weights[i][-2]) in route: # Remove one routing if already on the right NPU
-            route.remove(int(weights[i][-2]))
+        if source in route: # Remove one routing if already on the right NPU
+            route.remove(source)
             nb_recurrent += 1
         for expert in route:
-            d[expert//NUM_EXPERTS_PER_NODE] += UNIT_COMM_LOAD # Expert weight and ID and chosen expert (irrelevant in the case when there's only one expert per node)
-    return d, nb_recurrent
+            node_load[expert//NUM_EXPERTS_PER_NODE][source] += UNIT_COMM_LOAD # Expert weight and ID and chosen expert (irrelevant in the case when there's only one expert per node)
+    return node_load, nb_recurrent
             
+def full_mesh_comm(node_load):
+    pass
 
 if __name__ == "__main__":
     weights, routing = import_routing()
