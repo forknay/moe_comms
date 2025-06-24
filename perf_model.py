@@ -1,6 +1,6 @@
 from simulation import *
 
-## ASSUMING FULL MESH TOPOLOGY 
+## ASSUMING FULL MESH TOPOLOGY with cpu to send directions to DMA engines
 
 # Assumptions
 # No loss
@@ -17,7 +17,7 @@ UNIT_COMM_LOAD = (WEIGHT_PRECISION + 2*ID_PRECISION + ROUTING_PRECISION)
 
 # Infrastructure 
 NUM_LINKS = 1 # Number of links between two nodes
-HOST = True
+NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be)
 BASE_DELAY = 2 # in ms
 INTRA_BW = 100 # in GB/s
 INTER_BW = 50 # in GB/s
@@ -37,7 +37,11 @@ def convert_to_bytes(weights, routing):
     return node_load, nb_recurrent
             
 def full_mesh_comm(node_load):
-    pass
+    done = False
+    comm_time = 0
+    active_links = {i:[0]*NUM_NODES for i in range(NUM_NODES)} # Each node has a list of links and their status (index of the list is the destination node)
+    while not done:
+        pass
 
 if __name__ == "__main__":
     weights, routing = import_routing()
