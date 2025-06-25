@@ -18,8 +18,8 @@ UNIT_COMM_LOAD = (WEIGHT_PRECISION + 2*ID_PRECISION + ROUTING_PRECISION)
 NUM_LINKS = 1 # Number of links between two nodes
 NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
 BASE_DELAY = 2 # in ms
-INTRA_BW = 100000 # in GB/ms just using intra for now, no implementation for different clusters just yet
-INTER_BW = 50000 # in GB/ms
+INTRA_BW = 100 # in B/ms just using intra for now, no implementation for different clusters just yet
+INTER_BW = 50e6 # in B/ms
 
 def convert_to_bytes(weights, routing):
     node_load = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)}
@@ -41,7 +41,7 @@ def full_mesh_comm(node_load):
     max_active_links = NUM_LINKS * NUM_NODES * (NUM_NODES - 1) // 2
     active_links = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)} # Each node has a dict of links and their current load
     while True:
-        print(node_load)
+        print("NODE LOAD", node_load)
         existing_instruction = False
         existing_load = False
         for dest, source in node_load.items(): # Assign one round of data
@@ -61,6 +61,7 @@ def full_mesh_comm(node_load):
             print("comms")
         if not existing_load: # All done
             break
+        print("ACTIVE LINKS", active_links)
         for dest, source in active_links.items(): # Transmit one round of data
             round_time = [0]
             for src, load in source.items():
@@ -78,6 +79,6 @@ def full_mesh_comm(node_load):
 if __name__ == "__main__":
     weights, routing = import_routing()
     load, num_rec = convert_to_bytes(weights, routing)
-    print(load, num_rec)
+    #print(load, num_rec)
     print(sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
-    #print(full_mesh_comm(load))
+    print(full_mesh_comm(load))
