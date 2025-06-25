@@ -7,7 +7,6 @@ from simulation import *
 # No overhead
 # No memory allocation constraints, could just reserve space for decoding, not sure for prefill
 
-NUM_LAYERS = 61
 # Data conversion
 WEIGHT_PRECISION = 4 # FP32 bytes
 ROUTING_PRECISION = 1 # INT8 bytes
@@ -80,4 +79,5 @@ if __name__ == "__main__":
     weights, routing = import_routing()
     load, num_rec = convert_to_bytes(weights, routing)
     print(load, num_rec)
-    print(full_mesh_comm(load))
+    print(sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
+    #print(full_mesh_comm(load))

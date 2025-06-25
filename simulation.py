@@ -1,6 +1,7 @@
 import numpy as np
 import random
 
+NUM_LAYERS = 61
 NUM_EXPERTS = 128            # Total number of experts in the MoE layer
 SEQLEN = 1024                # Number of tokens to simulate
 TOP_K = 8                    # Number of routed experts assigned to each token
