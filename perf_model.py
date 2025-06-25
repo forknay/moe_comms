@@ -6,20 +6,31 @@ from simulation import *
 # No loss
 # No overhead
 # No memory allocation constraints, could just reserve space for decoding, not sure for prefill
+if TEST_PARAMS:
+    NUM_EXPERTS_PER_NODE = NUM_EXPERTS // NUM_NODES
+    UNIT_COMM_LOAD = 1
 
-# Data conversion
-WEIGHT_PRECISION = 4 # FP32 bytes
-ROUTING_PRECISION = 1 # INT8 bytes
-ID_PRECISION = 2 # INT16 bytes
-NUM_EXPERTS_PER_NODE = NUM_EXPERTS // NUM_NODES
-UNIT_COMM_LOAD = (WEIGHT_PRECISION + 2*ID_PRECISION + ROUTING_PRECISION)
+    # Infrastructure 
+    NUM_LINKS = 1 # Number of links between two nodes
+    NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
+    BASE_DELAY = 2 # in ms
+    INTRA_BW = 2 # in B/ms just using intra for now, no implementation for different clusters just yet
+    INTER_BW = 1 # in B/ms
+else:
 
-# Infrastructure 
-NUM_LINKS = 1 # Number of links between two nodes
-NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
-BASE_DELAY = 2 # in ms
-INTRA_BW = 100e6 # in B/ms just using intra for now, no implementation for different clusters just yet
-INTER_BW = 50e6 # in B/ms
+    # Data conversion
+    WEIGHT_PRECISION = 4 # FP32 bytes
+    ROUTING_PRECISION = 1 # INT8 bytes
+    ID_PRECISION = 2 # INT16 bytes
+    NUM_EXPERTS_PER_NODE = NUM_EXPERTS // NUM_NODES
+    UNIT_COMM_LOAD = (WEIGHT_PRECISION + 2*ID_PRECISION + ROUTING_PRECISION)
+
+    # Infrastructure 
+    NUM_LINKS = 1 # Number of links between two nodes
+    NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
+    BASE_DELAY = 2 # in ms
+    INTRA_BW = 100e6 # in B/ms just using intra for now, no implementation for different clusters just yet
+    INTER_BW = 50e6 # in B/ms
 
 def convert_to_bytes(weights, routing):
     node_load = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)}
