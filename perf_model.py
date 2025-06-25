@@ -18,7 +18,7 @@ UNIT_COMM_LOAD = (WEIGHT_PRECISION + 2*ID_PRECISION + ROUTING_PRECISION)
 NUM_LINKS = 1 # Number of links between two nodes
 NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
 BASE_DELAY = 2 # in ms
-INTRA_BW = 100 # in B/ms just using intra for now, no implementation for different clusters just yet
+INTRA_BW = 100e6 # in B/ms just using intra for now, no implementation for different clusters just yet
 INTER_BW = 50e6 # in B/ms
 
 def convert_to_bytes(weights, routing):
