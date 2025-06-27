@@ -52,4 +52,7 @@ else:
     INTER_BW = 50e6 # in B/ms
 
 
-    
+assert NUM_EXPERTS % NUM_NODES == 0, "Number of experts must be divisible by number of nodes"
+assert NUM_LINKS >= 1, "Number of links must be at least 1"
+assert INTRA_BW > 0 and INTER_BW > 0, "Bandwidth must be greater than 0"
+assert UNIT_COMM_LOAD > 0, "Unit communication load must be greater than 0"

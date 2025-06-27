@@ -7,12 +7,6 @@ from simulation import import_routing
 # No overhead
 # No memory allocation constraints, could just reserve space for decoding, not sure for prefill
 
-
-assert NUM_EXPERTS % NUM_NODES == 0, "Number of experts must be divisible by number of nodes"
-assert NUM_LINKS >= 1, "Number of links must be at least 1"
-assert INTRA_BW > 0 and INTER_BW > 0, "Bandwidth must be greater than 0"
-assert UNIT_COMM_LOAD > 0, "Unit communication load must be greater than 0"
-
 def convert_to_bytes(weights, routing):
     node_load = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)}
     num_recurrent = 0
