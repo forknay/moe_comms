@@ -32,6 +32,11 @@ else:
     INTRA_BW = 100e6 # in B/ms just using intra for now, no implementation for different clusters just yet
     INTER_BW = 50e6 # in B/ms
 
+assert NUM_EXPERTS % NUM_NODES == 0, "Number of experts must be divisible by number of nodes"
+assert NUM_LINKS >= 1, "Number of links must be at least 1"
+assert INTRA_BW > 0 and INTER_BW > 0, "Bandwidth must be greater than 0"
+assert UNIT_COMM_LOAD > 0, "Unit communication load must be greater than 0"
+
 def convert_to_bytes(weights, routing):
     node_load = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)}
     num_recurrent = 0
@@ -46,10 +51,11 @@ def convert_to_bytes(weights, routing):
 
     return node_load, num_recurrent
             
-def full_mesh_comm(node_load):
+def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
     comm_time = 0
     num_active_links = 0 
     max_active_links = NUM_LINKS * NUM_NODES * (NUM_NODES - 1) // 2
+    
     active_links = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)} # Each node has a dict of links and their current load
     while True:
         print("NODE LOAD", node_load)
@@ -61,8 +67,11 @@ def full_mesh_comm(node_load):
             existing_load = True
             for src, load in source.items():
                 if max_active_links == num_active_links:
+                    print("MAX ACTIVE LINKS REACHED")
                     break
-                elif active_links[dest][src] == 0 and active_links[src][dest] == 0 and load > 0: # Link is free and non-zero load
+                elif active_links[dest][src] == 0 and active_links[src][dest] == 0 and load != 0: # Link is free and non-zero load
+                    if load < 0:
+                        raise ValueError("Negative load detected, check routing and weights")
                     existing_instruction = True
                     active_links[dest][src] = load
                     node_load[dest][src] = 0
@@ -70,11 +79,12 @@ def full_mesh_comm(node_load):
         if existing_instruction:
             comm_time += BASE_DELAY*2 # One for CPU instruction, one for one for confirmation of completion
             print("comms")
-        if not existing_load: # All done
+        if not existing_load and num_active_links == 0: # All done
             break
         print("ACTIVE LINKS", active_links)
+        print("NUM ACTIVE LINKS", num_active_links)
+        round_time = [0]
         for dest, source in active_links.items(): # Transmit one round of data
-            round_time = [0]
             for src, load in source.items():
                 if load == 0:
                     continue
@@ -84,12 +94,19 @@ def full_mesh_comm(node_load):
                     
                 round_time.append(transferred_load/INTRA_BW)
                 active_links[dest][src] -= transferred_load
-            comm_time += max(round_time)
+        comm_time += max(round_time)
+        print(max(round_time), "ms")
+        print(comm_time)
     return comm_time
 
 if __name__ == "__main__":
-    weights, routing = import_routing()
-    load, num_rec = convert_to_bytes(weights, routing)
+    #weights, routing = import_routing()
+    #load, num_rec = convert_to_bytes(weights, routing)
     #print(load, num_rec)
-    print(sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
-    print(full_mesh_comm(load))
+    #print(sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
+    #print(full_mesh_comm(load))
+
+    node_load = {i: {j: 0 for j in range(10)} for i in range(10)}
+    node_load[0][9] = 1
+    node_load[9][0] = 1
+    print(full_mesh_comm(node_load))

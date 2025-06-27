@@ -4,7 +4,7 @@ import random
 TEST_PARAMS = True
 if TEST_PARAMS:
     NUM_LAYERS = 1
-    NUM_EXPERTS = 8             # Total number of experts in the MoE layer
+    NUM_EXPERTS = 10             # Total number of experts in the MoE layer
     SEQLEN = 128                  # Number of tokens to simulate
     TOP_K = 4                    # Number of routed experts assigned to each token
     EMBED_DIM = 16               # Embedding dimension size
@@ -13,7 +13,7 @@ if TEST_PARAMS:
     HOT_WEIGHT = 0.8             # Weight for hot experts 
     NUM_HOT_EXPERTS = int(NUM_EXPERTS * HOT_RATIO)  # Number of hot experts
 
-    NUM_NODES = 8
+    NUM_NODES = 10
 else:
     NUM_LAYERS = 61
     NUM_EXPERTS = 128            # Total number of experts in the MoE layer
