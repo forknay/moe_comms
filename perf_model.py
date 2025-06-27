@@ -1,36 +1,12 @@
-from simulation import *
-
+from params import *
+from simulation import import_routing
 ## ASSUMING FULL MESH TOPOLOGY with cpu to send directions to DMA engines
 
 # Assumptions
 # No loss
 # No overhead
 # No memory allocation constraints, could just reserve space for decoding, not sure for prefill
-if TEST_PARAMS:
-    NUM_EXPERTS_PER_NODE = NUM_EXPERTS // NUM_NODES
-    UNIT_COMM_LOAD = 1
 
-    # Infrastructure 
-    NUM_LINKS = 1 # Number of links between two nodes
-    NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
-    BASE_DELAY = 2 # in ms
-    INTRA_BW = 2 # in B/ms just using intra for now, no implementation for different clusters just yet
-    INTER_BW = 1 # in B/ms
-else:
-
-    # Data conversion
-    WEIGHT_PRECISION = 4 # FP32 bytes
-    ROUTING_PRECISION = 1 # INT8 bytes
-    ID_PRECISION = 2 # INT16 bytes
-    NUM_EXPERTS_PER_NODE = NUM_EXPERTS // NUM_NODES
-    UNIT_COMM_LOAD = (WEIGHT_PRECISION + 2*ID_PRECISION + ROUTING_PRECISION)
-
-    # Infrastructure 
-    NUM_LINKS = 1 # Number of links between two nodes
-    NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
-    BASE_DELAY = 2 # in ms
-    INTRA_BW = 100e6 # in B/ms just using intra for now, no implementation for different clusters just yet
-    INTER_BW = 50e6 # in B/ms
 
 assert NUM_EXPERTS % NUM_NODES == 0, "Number of experts must be divisible by number of nodes"
 assert NUM_LINKS >= 1, "Number of links must be at least 1"
@@ -100,13 +76,8 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
     return comm_time
 
 if __name__ == "__main__":
-    #weights, routing = import_routing()
-    #load, num_rec = convert_to_bytes(weights, routing)
-    #print(load, num_rec)
-    #print(sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
-    #print(full_mesh_comm(load))
-
-    node_load = {i: {j: 0 for j in range(10)} for i in range(10)}
-    node_load[0][9] = 1
-    node_load[9][0] = 1
-    print(full_mesh_comm(node_load))
+    weights, routing = import_routing()
+    load, num_rec = convert_to_bytes(weights, routing)
+    print(load, num_rec)
+    print(sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
+    print(full_mesh_comm(load))

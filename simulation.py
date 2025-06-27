@@ -1,31 +1,6 @@
 import numpy as np
 import random
-
-TEST_PARAMS = True
-if TEST_PARAMS:
-    NUM_LAYERS = 1
-    NUM_EXPERTS = 10             # Total number of experts in the MoE layer
-    SEQLEN = 128                  # Number of tokens to simulate
-    TOP_K = 4                    # Number of routed experts assigned to each token
-    EMBED_DIM = 16               # Embedding dimension size
-
-    HOT_RATIO = 0.5              # Ratio of hot experts 
-    HOT_WEIGHT = 0.8             # Weight for hot experts 
-    NUM_HOT_EXPERTS = int(NUM_EXPERTS * HOT_RATIO)  # Number of hot experts
-
-    NUM_NODES = 10
-else:
-    NUM_LAYERS = 61
-    NUM_EXPERTS = 128            # Total number of experts in the MoE layer
-    SEQLEN = 1024                # Number of tokens to simulate
-    TOP_K = 8                    # Number of routed experts assigned to each token
-    EMBED_DIM = 7168             # Embedding dimension size
-
-    HOT_RATIO = 0.5              # Ratio of hot experts 
-    HOT_WEIGHT = 0.8             # Weight for hot experts 
-    NUM_HOT_EXPERTS = int(NUM_EXPERTS * HOT_RATIO)  # Number of hot experts
-
-    NUM_NODES = 8
+from params import *
 
 class Gate:
     """Mixture-of-Experts routing gate simulation."""
