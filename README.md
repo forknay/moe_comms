@@ -6,7 +6,7 @@ MoE All-to-All communications modeling with simulation and performance modeling 
 - Routing data generation (with load imbalance parameters)
 - Routing data conversion to bytes for each node (dst, src)
 - Full mesh communication of a cluster (with host) with certain assumptions + Communication time
-
+- Multiple links per connection between nodes
 <br>
 
 ** Not supported (yet) / Assumptions: ** <br>
@@ -16,10 +16,8 @@ MoE All-to-All communications modeling with simulation and performance modeling 
 - Hierarchical communication (source to cluster, cluster to node)
 - Create visualization
 - Throughput calculation (prefill / decode)
-- Multiple links
+- 
 - Multiple DMA_engines
 - Multiple layers
 
 -----------------------------------------
-
-(Potentially add DP + AllReduce time analysis)
