@@ -66,7 +66,7 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
         
         print(comm_time)
     return comm_time
-def check_rounds(node_load: dict[int,dict[int,int]]):
+def check_rounds(node_load: dict[int,dict[int,int]]) -> int:
     max_load = set()
     for dest, source in node_load.items():
         for src, load in source.items():
