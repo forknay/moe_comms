@@ -1,5 +1,6 @@
 from params import *
 from simulation import import_routing
+import math
 ## ASSUMING FULL MESH TOPOLOGY with cpu to send directions to DMA engines
 
 # Assumptions
@@ -69,10 +70,20 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
         
         print(comm_time)
     return comm_time
-
+def check_rounds(node_load: dict[int,dict[int,int]]):
+    max_load = set()
+    for dest, source in node_load.items():
+        for src, load in source.items():
+            if node_load[src][dest] > 0:
+                if load % INTRA_BW != 0:
+                    load += 1
+            max_load.add(load + node_load[src][dest])
+    return math.ceil(math.ceil(max(max_load) / INTRA_BW) / NUM_LINKS)
+            
 if __name__ == "__main__":
     weights, routing = import_routing()
     load, num_rec = convert_to_bytes(weights, routing)
     print(load, num_rec)
     print(sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
+    print(check_rounds(load))
     print(full_mesh_comm(load))
