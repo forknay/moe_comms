@@ -23,16 +23,15 @@ def convert_to_bytes(weights, routing):
     return node_load, num_recurrent
             
 def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
-    comm_time = BASE_DELAY # GPU routing to CPU
+    comm_time = INITIAL_CPU_DELAY # GPU routing to CPU
     max_active_links = NUM_LINKS * NUM_NODES * (NUM_NODES - 1) // 2
-    num_rounds = 0
+    print("MAX ACTIVE LINKS:", max_active_links)
+    num_rounds = 1
     while True: # Each iteration is one round of data transfer
         active_links = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)} # Each node has a dict of links and their current load
-        num_rounds += 1
         print("ROUND", num_rounds)
         print("NODE LOAD", node_load)
         num_active_links = 0 
-        existing_instruction = False
         existing_load = False
         transfer_delay = 0
         for dest, source in node_load.items(): # Assign one round of data
@@ -48,23 +47,20 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
                         raise ValueError("Negative load detected, check routing and weights")
                     if min(load, INTRA_BW) > transfer_delay:
                         transfer_delay = min(load, INTRA_BW)
-                    existing_instruction = True
                     active_links[dest][src] += 1
                     active_links[src][dest] += 1
                     node_load[dest][src] -= min(load, INTRA_BW)
                     load -= min(load, INTRA_BW)
                     num_active_links += 1
-        if existing_load and not existing_instruction:
-            print(active_links)
-            raise ValueError("No existing instruction, but existing load found, this is unexpected")
-        transfer_delay /= INTRA_BW # Convert to time
-        if existing_instruction:
-            comm_time += BASE_DELAY*2 + transfer_delay # One for CPU->GPU  instruction, one for GPU->CPU confirmation of completion/reception
-            print("comms")
+
         if not existing_load: # All done
-            if num_active_links != 0:
-                raise ValueError("Active links not zero, but no existing load found")
-            break
+                    if num_active_links != 0:
+                        raise ValueError("Active links not zero, but no existing load found")
+                    break
+        transfer_delay /= INTRA_BW # Convert to time
+        print(transfer_delay)
+        comm_time += BASE_DELAY*2 + transfer_delay # One for CPU->GPU  instruction, one for GPU->CPU confirmation of completion/reception
+        num_rounds += 1
         print("ACTIVE LINKS", active_links)
         print("NUM ACTIVE LINKS", num_active_links)
         
@@ -83,7 +79,8 @@ def check_rounds(node_load: dict[int,dict[int,int]]):
 if __name__ == "__main__":
     weights, routing = import_routing()
     load, num_rec = convert_to_bytes(weights, routing)
-    print(load, num_rec)
-    print(sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
-    print(check_rounds(load))
+    print(f"Load (dest, src) (bytes): {load}, Recurrent load (bytes): {num_rec}")
+    print("Total load with recurrent equals expected load for hyperparameters:", sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
+    print("-"*20)
+    print("Expected num of rounds:", check_rounds(load))
     print(full_mesh_comm(load))

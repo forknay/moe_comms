@@ -4,24 +4,25 @@ TEST_PARAMS = True
 
 if TEST_PARAMS:
     NUM_LAYERS = 1
-    NUM_EXPERTS = 10             # Total number of experts in the MoE layer
-    SEQLEN = 128                  # Number of tokens to simulate
-    TOP_K = 4                    # Number of routed experts assigned to each token
+    NUM_EXPERTS = 4             # Total number of experts in the MoE layer
+    SEQLEN = 5                  # Number of tokens to simulate
+    TOP_K = 2                    # Number of routed experts assigned to each token
     EMBED_DIM = 16               # Embedding dimension size
 
     HOT_RATIO = 0.5              # Ratio of hot experts 
     HOT_WEIGHT = 0.8             # Weight for hot experts 
     NUM_HOT_EXPERTS = int(NUM_EXPERTS * HOT_RATIO)  # Number of hot experts
 
-    NUM_NODES = 10
+    NUM_NODES = 4
 
     NUM_EXPERTS_PER_NODE = NUM_EXPERTS // NUM_NODES
-    UNIT_COMM_LOAD = 1
+    UNIT_COMM_LOAD = 4
 
     # Infrastructure 
-    NUM_LINKS = 1 # Number of links between two nodes
+    NUM_LINKS = 2 # Number of links between two nodes
     NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
     BASE_DELAY = 2 # in ms
+    INITIAL_CPU_DELAY = 0 # in ms, delay for GPU to send routing to CPU
     INTRA_BW = 2 # in B/ms just using intra for now, no implementation for different clusters just yet
     INTER_BW = 1 # in B/ms
 else:
