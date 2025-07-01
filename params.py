@@ -19,7 +19,7 @@ if TEST_PARAMS:
     UNIT_COMM_LOAD = 4
 
     # Infrastructure 
-    NUM_LINKS = 2 # Number of links between two nodes
+    NUM_LINKS = 1 # Number of links between two nodes
     NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
     BASE_DELAY = 2 # in ms
     INITIAL_CPU_DELAY = 0 # in ms, delay for GPU to send routing to CPU
