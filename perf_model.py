@@ -28,6 +28,7 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
     print("MAX ACTIVE LINKS:", max_active_links)
     num_rounds = 1
     while True: # Each iteration is one round of data transfer
+        dma_engines = {i: [0,0] for i in range(NUM_NODES)} # Each node with the num of send and receive operations (must not exceed NUM_DMA_ENGINES) [send, receive]
         active_links = {i: {j:0 for j in range(NUM_NODES)} for i in range(NUM_NODES)} # Each node has a dict of links and their current load
         print("ROUND", num_rounds)
         print("NODE LOAD", node_load)
@@ -37,34 +38,50 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
         for dest, source in node_load.items(): # Assign one round of data
             if sum(source.values()) == 0:
                 continue
+            elif dma_engines[dest][1] >= NUM_DMA_ENGINES:
+                print(f"Node {dest} has reached max receive operations (outer)")
+                continue
             existing_load = True
             for src, load in source.items():
                 if max_active_links == num_active_links:
                     print("MAX ACTIVE LINKS REACHED")
                     break
+                elif dma_engines[src][0] >= NUM_DMA_ENGINES:
+                    print(f"Node {src} has reached max send operations (inner)")
+                    continue
                 while active_links[dest][src] < NUM_LINKS and active_links[src][dest] < NUM_LINKS and load != 0: # Link is free and non-zero load
                     if load < 0:
                         raise ValueError("Negative load detected, check routing and weights")
+                    elif dma_engines[src][0] >= NUM_DMA_ENGINES:
+                        print(f"Node {src} has reached max send operations")
+                        break
+                    elif dma_engines[dest][1] >= NUM_DMA_ENGINES:
+                        print(f"Node {dest} has reached max receive operations")
+                        break
                     if min(load, INTRA_BW) > transfer_delay:
                         transfer_delay = min(load, INTRA_BW)
+                    dma_engines[src][0] += 1
+                    dma_engines[dest][1] += 1
                     active_links[dest][src] += 1
                     active_links[src][dest] += 1
+                    
                     node_load[dest][src] -= min(load, INTRA_BW)
                     load -= min(load, INTRA_BW)
                     num_active_links += 1
 
         if not existing_load: # All done
-                    if num_active_links != 0:
-                        raise ValueError("Active links not zero, but no existing load found")
-                    break
+            if num_active_links != 0:
+                raise ValueError("Active links not zero, but no existing load found")
+            break
         transfer_delay /= INTRA_BW # Convert to time
         print(transfer_delay)
         comm_time += BASE_DELAY*2 + transfer_delay # One for CPU->GPU  instruction, one for GPU->CPU confirmation of completion/reception
         num_rounds += 1
         print("ACTIVE LINKS", active_links)
         print("NUM ACTIVE LINKS", num_active_links)
-        
-        print(comm_time)
+        print("DMA ENGINES", dma_engines)
+        print("COMM TIME", comm_time)
+        print("-"*20)
     return comm_time
 def check_rounds(node_load: dict[int,dict[int,int]]) -> int:
     max_load = set()
