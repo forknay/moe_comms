@@ -16,12 +16,12 @@ MoE All-to-All communications modeling with simulation and performance modeling 
 - Hierarchical communication (source to cluster, cluster to node)
 - Create visualization
 - Throughput calculation (prefill / decode)
-- 
+-  Fix packet size being fixed issue ****
 - Remove DMA engines
 - Multiple Layers == Independent
 - Round robin data packet sending with limit per packet
 - Add packet size, should be separate from bandwidth consideration
 - Add delay/transfer parallelization for each round (ie each packet needs to prepare but can be prepared while last packet is sending) (list all packets for a round, choose link with most packets, do parallelization for those to find critical path)
 - Add comms for allocation
-- 
+- Separate packets that may overlap over two links 
 -----------------------------------------
