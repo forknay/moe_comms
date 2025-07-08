@@ -17,7 +17,7 @@ MoE All-to-All communications modeling with simulation and performance modeling 
 - Create visualization
 - Throughput calculation (prefill / decode)
 -  Fix packet size being fixed issue ****
-- Remove DMA engines
+- could still be dest, src in simulation, will have to make sure (should be fine, i dont think dest src is identified there)
 - Multiple Layers == Independent
 - Round robin data packet sending with limit per packet
 - Add packet size, should be separate from bandwidth consideration

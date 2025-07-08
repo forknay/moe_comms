@@ -72,7 +72,7 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
                         dram_map[dest] += packet_size
                         node_load[src][dest] -= packet_size
                         if node_load[src][dest] < 0:
-                            print(packet_size, node_load[src][dest])
+                            raise ValueError(f"Negative load for {src} to {dest}, load: {node_load[src][dest]}")
                         load -= packet_size
                         
 
@@ -82,13 +82,13 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
         temp = [i.values() for i in active_links.values()]
         packet_list = []
         for values in temp:
-            print(values)
             for value in values:
                 packet_list += [value[0][0]]
         largest_packets = max([(sum(i), i) for i in packet_list]) if packet_list else 0
         most_packets = max([(len(i), i) for i in packet_list]) if packet_list else 0
         if largest_packets[1] != most_packets[1]:
             print("WARNING: Largest packet size is not equal to the number of packets")
+        print("LARGEST PACKET SIZE", largest_packets[1], "PACKETS", most_packets[1])
         round_time = most_packets[0]*PACKET_PREP_DELAY + largest_packets[0]*INTRA_BW # Convert to time, no parallelization yet
         print(round_time)
         comm_time += BASE_DELAY + round_time # GPU->CPU confirmation of round completion
