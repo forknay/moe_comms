@@ -25,6 +25,11 @@ if TEST_PARAMS:
     INITIAL_CPU_DELAY = 0 # in ms, delay for GPU to send routing to CPU
     INTRA_BW = 2 # in B/ms just using intra for now, no implementation for different clusters just yet
     INTER_BW = 1 # in B/ms
+    PACKET_SIZE = 32 # in bytes
+    PACKET_PREP_DELAY = 1 # in ms
+    PARALLELIZATION_MULTIPLIER = 1.2 # Extra time needed if done in parallel
+    ROUND_ROBIN_MAX_PACKETS = 2 # Max packets before switching to another node (could come back if no other nodes have packets to send)
+
 else:
     NUM_LAYERS = 61
     NUM_EXPERTS = 128            # Total number of experts in the MoE layer
@@ -49,8 +54,12 @@ else:
     NUM_LINKS = 1 # Number of links between two nodes
     NUM_DMA_ENGINES = 1 # Number of full-duplex DMA engines per node (determines how parallel the communication can be), no implementation yet, assume infinite engines
     BASE_DELAY = 2 # in ms
-    INTRA_BW = 100e6 # in B/ms just using intra for now, no implementation for different clusters just yet
-    INTER_BW = 50e6 # in B/ms
+    INTRA_BW = 100 # in B/ms just using intra for now, no implementation for different clusters just yet
+    INTER_BW = 50 # in B/ms
+    PACKET_SIZE = 128 # in bytes
+    PACKET_PREP_DELAY = 1 # in ms
+    PARALLELIZATION_MULTIPLIER = 1.2 # Extra time needed if done in parallel
+    ROUND_ROBIN_MAX_PACKETS = 2 # Max packets before switching to another node (could come back if no other nodes have packets to send)
 
 
 assert NUM_EXPERTS % NUM_NODES == 0, "Number of experts must be divisible by number of nodes"

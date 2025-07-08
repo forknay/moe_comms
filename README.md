@@ -13,12 +13,15 @@ MoE All-to-All communications modeling with simulation and performance modeling 
 **Not supported (yet) / Assumptions:** <br>
 - Packet loss and retransmission
 - Memory constraints (would need extra comms for allocation) *
-- Prefill/Decode stage separation *
 - Hierarchical communication (source to cluster, cluster to node)
 - Create visualization
 - Throughput calculation (prefill / decode)
 - 
-- Multiple DMA_engines *
-- Multiple layers *
-
+- Remove DMA engines
+- Multiple Layers == Independent
+- Round robin data packet sending with limit per packet
+- Add packet size, should be separate from bandwidth consideration
+- Add delay/transfer parallelization for each round (ie each packet needs to prepare but can be prepared while last packet is sending) (list all packets for a round, choose link with most packets, do parallelization for those to find critical path)
+- Add comms for allocation
+- 
 -----------------------------------------
