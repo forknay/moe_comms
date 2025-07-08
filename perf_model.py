@@ -48,6 +48,7 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
                     num_packets = 0 # Round robin counter
                     while load > 0 and num_packets < ROUND_ROBIN_MAX_PACKETS:
                         packet_size = min(load, PACKET_SIZE)
+                        print(packet_size, dram_map[src])
                         if dram_map[src] + packet_size > GPU_DRAM or dram_map[dest] + packet_size > GPU_DRAM:
                             print(f"Node {src} or {dest} has no more space in DRAM, skipping")
                             break
@@ -122,7 +123,7 @@ def check_rounds_dma(node_load: dict[int,dict[int,int]]) -> int:
         dma_engines = {i: [0,0] for i in range(NUM_NODES)} # Each node with the num of send and receive operations (must not exceed NUM_DMA_ENGINES) [send, receive]
         num_rounds += 1
         for src, dest in operations:
-            if dma_engines[src][0] < NUM_DMA_ENGINES and dma_engines[dest][1] < NUM_DMA_ENGINES and (removed.count((src,dest)) + removed.count((dest,src))) < NUM_LINKS:
+            if dma_engines[src][0] < 1 and dma_engines[dest][1] < 1 and (removed.count((src,dest)) + removed.count((dest,src))) < NUM_LINKS:
                 dma_engines[src][0] += 1
                 dma_engines[dest][1] += 1
                 removed.append((src, dest))
@@ -136,6 +137,5 @@ if __name__ == "__main__":
     print(f"Load (dest, src) (bytes): {load}, Recurrent load (bytes): {num_rec}")
     print("Total load with recurrent equals expected load for hyperparameters:", sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
     print("Expected num of rounds:", check_rounds(load))
-    print(f"Expected num of rounds with {NUM_DMA_ENGINES} DMA engines: {check_rounds_dma(load)}")
     print("-"*20)
     print(full_mesh_comm(load))
