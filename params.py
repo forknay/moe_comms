@@ -1,6 +1,6 @@
 # Config parameters for the simulation
 
-TEST_PARAMS = False
+TEST_PARAMS = True
 
 if TEST_PARAMS:
     NUM_LAYERS = 1
