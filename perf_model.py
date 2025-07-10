@@ -89,7 +89,7 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
         if largest_packets[1] != most_packets[1]:
             print("WARNING: Largest packet size is not equal to the largest number of packets")
         print("LARGEST PACKET SIZE", largest_packets, "MOST PACKETS", most_packets)
-        round_time = most_packets[0]*PACKET_PREP_DELAY + largest_packets[0]*INTRA_BW # Convert to time, no parallelization yet
+        round_time = most_packets[0]*PACKET_PREP_DELAY + largest_packets[0]/INTRA_BW # Convert to time, no parallelization yet
         print(round_time)
         comm_time += BASE_DELAY + round_time # GPU->CPU confirmation of round completion
         num_rounds += 1
@@ -132,10 +132,17 @@ def check_rounds_dma(node_load: dict[int,dict[int,int]]) -> int:
     return num_rounds
         
 if __name__ == "__main__":
-    weights, routing = import_routing()
+    """weights, routing = import_routing()
     load, num_rec = convert_to_bytes(weights, routing)
     print(f"Load (dest, src) (bytes): {load}, Recurrent load (bytes): {num_rec}")
     print("Total load with recurrent equals expected load for hyperparameters:", sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
     print("Expected num of rounds:", check_rounds(load))
     print("-"*20)
-    print(full_mesh_comm(load))
+    print(full_mesh_comm(load))"""
+    node_load = {
+    0: {0: 0, 1: 10, 2: 0, 3: 0},
+    1: {0: 0, 1: 0, 2: 0, 3: 0},
+    2: {0: 0, 1: 0, 2: 0, 3: 0},
+    3: {0: 0, 1: 0, 2: 0, 3: 0}
+}
+    print(full_mesh_comm(node_load))

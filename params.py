@@ -22,13 +22,13 @@ if TEST_PARAMS:
     NUM_LINKS = 2 # Number of links between two nodes
     BASE_DELAY = 2 # in ms
     INITIAL_CPU_DELAY = 0 # in ms, delay for GPU to send routing to CPU
-    INTRA_BW = 5 # in B/ms just using intra for now, no implementation for different clusters just yet
+    INTRA_BW = 2 # in B/ms just using intra for now, no implementation for different clusters just yet
     INTER_BW = 2 # in B/ms
     PACKET_SIZE = 1 # in bytes
     PACKET_PREP_DELAY = 1 # in ms
     PARALLELIZATION_MULTIPLIER = 1.2 # Extra time needed if done in parallel
     ROUND_ROBIN_MAX_PACKETS = 2 # Max packets before switching to another node (could come back if no other nodes have packets to send)
-    GPU_DRAM = 15
+    GPU_DRAM = 10000
 
 else:
     NUM_LAYERS = 58
