@@ -28,8 +28,9 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
     while True: # Each iteration is one round of data transfer
         dram_map = {i: 0 for i in range(NUM_NODES)} # Each node with the amount of used DRAM
         active_links = {i: {j:[[[0], 0]]*NUM_LINKS for j in range(NUM_NODES)} for i in range(NUM_NODES)} # [[packets], direction] for each link, direction is positive for src->dest, negative for dest->src
-        print("ROUND", num_rounds)
-        print("NODE LOAD", node_load)
+        if DEBUG:
+            print("ROUND", num_rounds)
+            print("NODE LOAD", node_load)
         existing_load = False
         round_time = 0
         for src, dest_loads in node_load.items(): # Assign one round of data
@@ -43,19 +44,17 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
                     num_packets = 0 # Round robin counter
                     while load > 0 and num_packets < ROUND_ROBIN_MAX_PACKETS:
                         packet_size = min(load, PACKET_SIZE) # Assuming no flags or other headers
-                        print(packet_size, dram_map[src])
                         if dram_map[src] + packet_size > GPU_DRAM:
-                            print(f"Node {src} has no more space in DRAM, skipping")
+                            print(f"Node {src} has no more space in DRAM, skipping") if DEBUG else None
                             break
                         elif dram_map[dest] + packet_size > GPU_DRAM:
-                            print(f"Node {dest} has no more space in DRAM, skipping")
+                            print(f"Node {dest} has no more space in DRAM, skipping") if DEBUG else None
                             break
                         # Find all links where the sent packets do not exceed the intra-node bandwidth and the link is in the correct direction (or not used)
                         possible_links = sorted([(i, link) for i, link in enumerate(active_links[src][dest]) if ((sum(link[0]) + packet_size) <= INTRA_BW) and (link[1] >= 0)]) # Assume reverse link is at the same index
                         # Currently take first available link (implies already used links first if they are not full). Could be edited to take non-used links first for parallelization rather than maximum utilization of each link
-                        print(possible_links)
                         if not possible_links:
-                            print(f"No available links for {src} to {dest}, skipping")
+                            print(f"No available links for {src} to {dest}, skipping") if DEBUG else None
                             break
 
                         transferred = True
@@ -76,7 +75,7 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
                         load -= packet_size
 
         if not existing_load: # All done
-            print("No more data to transfer, exiting")
+            print("No more data to transfer, exiting") if DEBUG else None
             break
         # Find link with most transferred packets & largest cumulative size (should usually be the same unless bunch of small packets are sent)
         temp = [i.values() for i in active_links.values()]
@@ -88,27 +87,19 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
         most_packets = max([(len(i), i) for i in packet_list]) if packet_list else 0
         if largest_packets[1] != most_packets[1]:
             print("WARNING: Largest packet size is not equal to the largest number of packets")
-        print("LARGEST PACKET SIZE", largest_packets, "MOST PACKETS", most_packets)
         round_time = most_packets[0]*PACKET_PREP_DELAY + largest_packets[0]/INTRA_BW # Convert to time, no parallelization yet
-        print(round_time)
         comm_time += BASE_DELAY + round_time # GPU->CPU confirmation of round completion
         num_rounds += 1
-        print("ACTIVE LINKS", active_links)
-        print("COMM TIME", comm_time)
-        print("-"*20)
+        if DEBUG:
+            print("LARGEST PACKET SIZE", largest_packets, "MOST PACKETS", most_packets)
+            print("Round time:", round_time)
+            print("ACTIVE LINKS", active_links)
+            print("COMM TIME", comm_time)
+            print("-"*20)
     return comm_time
 
-def check_rounds(node_load: dict[int,dict[int,int]]) -> int: # Assumes no DMA restrictions
-    max_load = set()
-    for dest, source in node_load.items():
-        for src, load in source.items():
-            if src < dest:
-                continue
-            if node_load[src][dest] > 0:
-                if load % INTRA_BW != 0:
-                    load += 1
-            max_load.add(load + node_load[src][dest])
-    return math.ceil(math.ceil(max(max_load) / INTRA_BW) / NUM_LINKS)
+def check_rounds(node_load: dict[int,dict[int,int]]) -> int: # Needs implementation
+    pass
 
 def check_rounds_dma(node_load: dict[int,dict[int,int]]) -> int:
     operations = []
@@ -132,17 +123,9 @@ def check_rounds_dma(node_load: dict[int,dict[int,int]]) -> int:
     return num_rounds
         
 if __name__ == "__main__":
-    """weights, routing = import_routing()
+    weights, routing = import_routing()
     load, num_rec = convert_to_bytes(weights, routing)
     print(f"Load (dest, src) (bytes): {load}, Recurrent load (bytes): {num_rec}")
-    print("Total load with recurrent equals expected load for hyperparameters:", sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
-    print("Expected num of rounds:", check_rounds(load))
     print("-"*20)
-    print(full_mesh_comm(load))"""
-    node_load = {
-    0: {0: 0, 1: 10, 2: 0, 3: 0},
-    1: {0: 0, 1: 0, 2: 0, 3: 0},
-    2: {0: 0, 1: 0, 2: 0, 3: 0},
-    3: {0: 0, 1: 0, 2: 0, 3: 0}
-}
-    print(full_mesh_comm(node_load))
+    print("Total load with recurrent equals expected load for hyperparameters:", sum([sum(i.values()) for i in load.values()])+num_rec == SEQLEN*TOP_K*UNIT_COMM_LOAD)
+    print("Comm time:", full_mesh_comm(load), "ms")

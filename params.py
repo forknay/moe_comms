@@ -1,6 +1,7 @@
 # Config parameters for the simulation
 
-TEST_PARAMS = True
+DEBUG = False
+TEST_PARAMS = False
 
 if TEST_PARAMS:
     NUM_LAYERS = 1
@@ -37,7 +38,7 @@ else:
     TOP_K = 8                    # Number of routed experts assigned to each token
     EMBED_DIM = 7168             # Embedding dimension size
 
-    HOT_RATIO = 0.5              # Ratio of hot experts 
+    HOT_RATIO = 0.3              # Ratio of hot experts 
     HOT_WEIGHT = 0.8             # Weight for hot experts 
     NUM_HOT_EXPERTS = int(NUM_EXPERTS * HOT_RATIO)  # Number of hot experts
 
@@ -60,7 +61,7 @@ else:
     PACKET_PREP_DELAY = 1 # in ms
     PARALLELIZATION_MULTIPLIER = 1.2 # Extra time needed if done in parallel
     ROUND_ROBIN_MAX_PACKETS = 5 # Max packets before switching to another node (could come back if no other nodes have packets to send)
-    GPU_DRAM = 1000
+    GPU_DRAM = 10000
 
 
 assert NUM_EXPERTS % NUM_NODES == 0, "Number of experts must be divisible by number of nodes"
