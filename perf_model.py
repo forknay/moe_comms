@@ -101,27 +101,6 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
 def check_rounds(node_load: dict[int,dict[int,int]]) -> int: # Needs implementation
     pass
 
-def check_rounds_dma(node_load: dict[int,dict[int,int]]) -> int:
-    operations = []
-    for dest, source in node_load.items():
-        for src, load in source.items():
-            for _ in range(math.ceil(load / INTRA_BW)):
-                operations.append((src,dest))
-    num_rounds = 0
-    
-    while operations:
-        removed = []
-        dma_engines = {i: [0,0] for i in range(NUM_NODES)} # Each node with the num of send and receive operations (must not exceed NUM_DMA_ENGINES) [send, receive]
-        num_rounds += 1
-        for src, dest in operations:
-            if dma_engines[src][0] < 1 and dma_engines[dest][1] < 1 and (removed.count((src,dest)) + removed.count((dest,src))) < NUM_LINKS:
-                dma_engines[src][0] += 1
-                dma_engines[dest][1] += 1
-                removed.append((src, dest))
-        for packet in removed:
-            operations.remove(packet)
-    return num_rounds
-        
 if __name__ == "__main__":
     weights, routing = import_routing()
     load, num_rec = convert_to_bytes(weights, routing)
