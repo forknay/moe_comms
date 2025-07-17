@@ -1,6 +1,5 @@
 from params import *
 from simulation import import_routing
-import math
 ## ASSUMING FULL MESH TOPOLOGY with cpu to send directions to DMA engines
 
 # Assumptions
