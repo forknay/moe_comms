@@ -19,4 +19,5 @@ MoE All-to-All communications modeling with simulation and performance modeling 
 - Add flag size for packets
 - Currently round robin only applied inside a node load, ie starting at node 0 it will try to finish all node 0 sends before moving to node 1, inefficiency as it might have no receives during first rounds
 - PCIe FIFO Buffer Size (smaller packets would have inefficiencies)
+- Add support for multiple GPUs per node (easy)
 -----------------------------------------
