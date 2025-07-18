@@ -29,7 +29,7 @@ if TEST_PARAMS:
     PACKET_PREP_DELAY = 1 # in ms
     PARALLELIZATION_MULTIPLIER = 1.2 # Extra time needed if done in parallel
     ROUND_ROBIN_MAX_PACKETS = 2 # Max packets before switching to another node (could come back if no other nodes have packets to send)
-    GPU_DRAM = 10000
+    NIC_RATE = 10000 # Bytes 
 
 else:
     NUM_LAYERS = 58
@@ -61,7 +61,7 @@ else:
     PACKET_PREP_DELAY = 1 # in ms
     PARALLELIZATION_MULTIPLIER = 1.2 # Extra time needed if done in parallel
     ROUND_ROBIN_MAX_PACKETS = 5 # Max packets before switching to another node (could come back if no other nodes have packets to send)
-    GPU_DRAM = 10000
+    NIC_RATE = 10000 # Bytes
 
 
 assert NUM_EXPERTS % NUM_NODES == 0, "Number of experts must be divisible by number of nodes"
