@@ -28,7 +28,7 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
     while True: # Each iteration is one round of data transfer
         output.append("---------------")
         output.append(f"ROUND {num_rounds}")
-        dram_map = {i: 0 for i in range(NUM_NODES)} # Each node with the amount of used DRAM
+        nic_map = {i: 0 for i in range(NUM_NODES)} # Each node with the amount of used NIC memory
         active_links = {i: {j:[[[0], 0]]*NUM_LINKS for j in range(NUM_NODES)} for i in range(NUM_NODES)} # [[packets], direction] for each link, direction is positive for src->dest, negative for dest->src
         if DEBUG:
             print("ROUND", num_rounds)
@@ -46,11 +46,11 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
                     num_packets = 0 # Round robin counter
                     while load > 0 and num_packets < ROUND_ROBIN_MAX_PACKETS:
                         packet_size = min(load, PACKET_SIZE) # Assuming no flags or other headers
-                        if dram_map[src] + packet_size > NIC_RATE:
+                        if nic_map[src] + packet_size > NIC_RATE:
                             print(f"Node {src} has no more space in DRAM, skipping") if DEBUG else None
                             #output.append(f"Node {src} has no more space in DRAM, skipping")
                             break
-                        elif dram_map[dest] + packet_size > NIC_RATE:
+                        elif nic_map[dest] + packet_size > NIC_RATE:
                             print(f"Node {dest} has no more space in DRAM, skipping") if DEBUG else None
                             #output.append(f"Node {dest} has no more space in DRAM, skipping")
                             break
@@ -72,8 +72,8 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
                             active_links[src][dest][link[0]][0].append(packet_size)
                             active_links[dest][src][link[0]][0].append(packet_size)
 
-                        dram_map[src] += packet_size
-                        dram_map[dest] += packet_size
+                        nic_map[src] += packet_size
+                        nic_map[dest] += packet_size
                         node_load[src][dest] -= packet_size
                         if node_load[src][dest] < 0:
                             raise ValueError(f"Negative load for {src} to {dest}, load: {node_load[src][dest]}")
@@ -105,7 +105,7 @@ def full_mesh_comm(node_load: dict[int,dict[int,int]] ) -> float:
         output.append(f"LARGEST PACKET SIZE: {largest_packets}, MOST PACKETS: {most_packets}")
         output.append(f"Round time: {round_time} ms")
         output.append(f"ACTIVE LINKS: {active_links}")
-        output.append(f"DRAM MAP: {dram_map}")
+        output.append(f"NIC MAP: {nic_map}")
         output.append(f"COMM TIME: {comm_time} ms")
     file = open("comm_log.txt", "w")
     file.write("\n".join(output))
