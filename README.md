@@ -1,6 +1,14 @@
 # moe_comms
 MoE All-to-All communications modeling with simulation and performance modeling <br>
 
+Follow steps to use: <br>
+
+1. Set desired parameters and mode in params.py
+2. Run simulation.py to generate routing data
+3. Run perf_model.py to run communications simulation
+4. See traces in comm_log.txt (diagrams detailing the high-level design of simulation.py and perf_model.py can be found in the PDF)
+<br>
+
 **Currently Supports:**
 <br>
 - Parameters for different MoE configurations and hardware restrictions
